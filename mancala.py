@@ -15,13 +15,15 @@ def output_log(_file_stream,_record_per_game,_first,_second,winner):
     fw.write(_record_per_game+"\t"+_first+"\t"+_second+"\t"+winner+"\n")
 
 def move(_status, _decision):
-    #自分側のポケットであることは**前提**
+    #自分側のポケットであることは**前提** それを元に手番を判断する。
+    #ここでは各AIと違って、先手視点の盤面になっている(_decisionは7:13も入る)
     #何か入ってるか確認
     if _status[_decision] == 0:
         raise ValueError
     #相手のゴールポケットはスキップ
     skip = 6 if _decision//7==1 else 13
-    just = 19 - skip
+    just = 19 - skip #自分のゴール
+    finish = False
     again = False
     robbery = False
     #動かす
@@ -37,20 +39,18 @@ def move(_status, _decision):
         temp_position += 1
         add -= 1
     temp_position -= 1 #最後にいれた場所
-    #ぴったりゴール　と　横取り　を確認。ぴったりゴールだと、次の番を自分で返す。
-    again = True if temp_position == just else False
-    if _status[temp_position] == 1 and just-temp_position >= 1 and just-temp_position <= 6 and _status[12-temp_position] != 0:
+    #ぴったりゴール確認
+    if temp_position == just:
+        again = True
+    #横取り確認
+    elif _status[temp_position] == 1 and 1 <= just-temp_position <= 6 and _status[12-temp_position] != 0:
         robbery = True
         _status[just] += _status[12-temp_position]
         _status[12-temp_position] = 0
-    #上がったかどうかを確認
-    if _status[0]==0 and _status[1]==0 and _status[2]==0 and _status[3]==0 and _status[4]==0 and _status[5]==0:
-        goal = True
-    elif _status[7]==0 and _status[8]==0 and _status[9]==0 and _status[10]==0 and _status[11]==0 and _status[12]==0:
-        goal = True
-    else:
-        goal = False
-    return {"status":_status, "goal":goal, "again":again, "robbery":robbery}
+    #ゲーム終了を確認
+    if sum(_status[0:6])==0 or sum(_status[7:13])==0:
+        finish = True
+    return {"status":_status, "finish":finish, "again":again, "robbery":robbery}
 
 def reverse_board(_status):
     temp_status = []*14
@@ -76,7 +76,7 @@ def play(_first, _second):
         pretty_print(status)
         if result["robbery"] == True:
             print("Robbery!")
-        if result["goal"] == True:
+        if result["finish"] == True:
             break
         if result["again"] == False:
             turn += 1

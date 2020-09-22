@@ -28,12 +28,12 @@ class AI:
         for i in range(6):
             if _status[i] == 0:
                 score_list[i] = -float("inf")
-                result_list.append({"status":False, "goal":False, "again":False, "robbery":False})
+                result_list.append({"status":False, "finish":False, "again":False, "robbery":False})
                 continue
             temp_status = _status.copy()
             temp_result = mancala.move(temp_status, i)
             if temp_result["again"] == True:
-                if temp_result["goal"] == True:
+                if temp_result["finish"] == True:
                     return i, temp_result
                 temp_decision, temp_result = AI.decide_sub(temp_result["status"], _original_status)
             score_list[i] = sum([x - y for (x, y) in zip(temp_result["status"][0:6], _original_status[0:6])]) + (temp_result["status"][6]-_original_status[6])*AI.GOAL_RATIO

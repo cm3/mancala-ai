@@ -20,7 +20,7 @@ class AI:
         for i in range(6):
             if _status[i] == 0:
                 score_list[i] = -float("inf")
-                result_list.append({"status":False, "goal":False, "again":False, "robbery":False})
+                result_list.append({"status":False, "finish":False, "again":False, "robbery":False})
                 continue
             temp_status = _status.copy()
             temp_result = mancala.move(temp_status, i)
